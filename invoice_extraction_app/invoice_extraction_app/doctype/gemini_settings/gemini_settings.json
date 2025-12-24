@@ -17,6 +17,7 @@
       "fieldtype": "Table",
       "label": "Gemini Keys",
       "reqd": 0,
+      "hidden": 1,
       "options": "Gemini API Key"
     },
     {
