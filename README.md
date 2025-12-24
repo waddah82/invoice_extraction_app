@@ -7,10 +7,15 @@ Invoice Extraction App
 mit
 
 installiation
+
 bench get-app https://github.com/waddah82/invoice_extraction_app
+
 source env/bin/activate
+
 pip install google-generativeai pillow requests python-dotenv
+
 deactivate
+
 bench --site [site name] install-app invoice_extraction_app
 
 
