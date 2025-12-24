@@ -16,6 +16,10 @@ pip install google-generativeai pillow requests python-dotenv
 
 deactivate
 
+or
+
+bench setup requirements
+
 bench --site [site_name] install-app invoice_extraction_app
 
 
