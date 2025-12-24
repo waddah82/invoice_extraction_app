@@ -1,0 +1,79 @@
+{
+    "name": "Extracted Invoice Item",
+    "doctype": "DocType",
+    "module": "Invoice Extraction App",
+    "custom": 1,
+    "istable": 1,
+    "fields": [
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "label": "Extracted Item Name",
+            "reqd": 1
+        },
+        {
+            "fieldname": "item_link",
+            "fieldtype": "Link",
+            "label": "Matched Item",
+            "options": "Item",
+            "description": "Select existing item or leave empty to create new"
+        },
+        {
+            "fieldname": "matched",
+            "fieldtype": "Link",
+            "label": "Matched",
+            "options": "Item",
+            "description": "Select existing item or leave empty to create new"
+        },
+        {
+            "fieldname": "quantity",
+            "fieldtype": "Float",
+            "label": "Quantity",
+            "default": 1,
+            "precision": "2"
+        },
+        {
+            "fieldname": "rate",
+            "fieldtype": "Currency",
+            "label": "Rate"
+        },
+        {
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "label": "Amount",
+            "read_only": 1
+        },
+        {
+            "fieldname": "tax_amount",
+            "fieldtype": "Currency",
+            "label": "tax_amount",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_with_tax",
+            "fieldtype": "Currency",
+            "label": "total_with_tax",
+            "read_only": 1
+        },
+        {
+            "fieldname": "taxable",
+            "fieldtype": "Check",
+            "label": "Taxable",
+            "default": 1
+        },
+        {
+            "fieldname": "language",
+            "fieldtype": "Select",
+            "label": "Language",
+            "options": "ar\nen",
+            "default": "ar"
+        },
+        {
+            "fieldname": "is_new_item",
+            "fieldtype": "Check",
+            "label": "New Item",
+            "default": 0,
+            "hidden": 1
+        }
+    ]
+}
