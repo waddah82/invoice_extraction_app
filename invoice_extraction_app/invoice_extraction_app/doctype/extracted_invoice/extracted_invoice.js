@@ -1,3 +1,5 @@
+// invoice_extraction_app/doctype/extracted_invoice/extracted_invoice.js
+
 frappe.ui.form.on('Extracted Invoice', {
     onload: function(frm) {
         console.log("📄 Form loaded");
@@ -204,28 +206,114 @@ function populate_form_with_data(frm, data) {
         let matched_item_code = '';
         let matched_item_name = '';
         
-        if (description) {
-            frappe.call({
-                method: 'frappe.client.get_list',
-                args: {
-                    doctype: 'Item',
-                    filters: [['item_name', 'like', `%${description}%`]],
-                    fields: ['name', 'item_name', 'item_code'],
-                    limit: 1
-                },
-                async: false,
-                callback: function(r) {
-                    if (r.message && r.message.length > 0) {
-                        matched_item_id = r.message[0].name;
-                        matched_item_code = r.message[0].item_code || '';
-                        matched_item_name = r.message[0].item_name;
-                    }
-                }
-            });
-        }
         
-        // تعيين قيم الصف
-        row.item_name = description;
+        if (description) {
+            const current_supplier_name = frm.doc.supplier_name;
+            console.log("Current supplier:", current_supplier_name);
+            
+            let found_item = null;
+            
+            if (current_supplier_name) {
+                const tag_match = description.match(/#([^#]+)#/);
+                
+                if (tag_match) {
+                    const tag = tag_match[1].trim();
+                    console.log("Found tag for supplier item search:", tag);
+                    
+                    frappe.call({
+                        method: 'frappe.client.get_list',
+                        args: {
+                            doctype: 'Item Supplier',
+                            filters: [
+                                ['supplier', '=', current_supplier_name],
+                                ['supplier_part_no', 'like', `%${tag}%`]
+                            ],
+                            fields: ['parent', 'supplier', 'supplier_part_no'],
+                            limit: 1
+                        },
+                        async: false,
+                        callback: function(r) {
+                            if (r.message && r.message.length > 0) {
+                                const supplier_item = r.message[0];
+                                console.log("✅ Found in supplier items:", supplier_item);
+                                
+                                frappe.call({
+                                    method: 'frappe.client.get',
+                                    args: {
+                                        doctype: 'Item',
+                                        name: supplier_item.parent
+                                    },
+                                    async: false,
+                                    callback: function(item_r) {
+                                        if (item_r.message) {
+                                            found_item = item_r.message;
+                                            console.log("✅ Item found via supplier:", found_item.item_name);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+            
+            if (!found_item) {
+                const tag_match = description.match(/#([^#]+)#/);
+                
+                if (tag_match) {
+                    const tag = tag_match[1].trim();
+                    console.log("Searching by general tag:", tag);
+                    
+                    frappe.call({
+                        method: 'frappe.client.get_list',
+                        args: {
+                            doctype: 'Item',
+                            filters: [['description', 'like', `%#${tag}#%`]],
+                            fields: ['name', 'item_name', 'item_code'],
+                            limit: 1
+                        },
+                        async: false,
+                        callback: function(r) {
+                            if (r.message && r.message.length > 0) {
+                                found_item = r.message[0];
+                                console.log("✅ Found item by general tag:", found_item.item_name);
+                            }
+                        }
+                    });
+                }
+            }
+            
+            if (!found_item) {
+                frappe.call({
+                    method: 'frappe.client.get_list',
+                    args: {
+                        doctype: 'Item',
+                        filters: [['item_name', 'like', `%${description}%`]],
+                        fields: ['name', 'item_name', 'item_code'],
+                        limit: 1
+                    },
+                    async: false,
+                    callback: function(r) {
+                        if (r.message && r.message.length > 0) {
+                            matched_item_id = r.message[0].name;
+                            matched_item_code = r.message[0].item_code || '';
+                            matched_item_name = r.message[0].item_name;
+                            console.log("✅ Found item by name:", matched_item_name);
+                        } else {
+                            console.log("❌ No item found for:", description);
+                        }
+                    }
+                });
+            } else {
+                matched_item_id = found_item.name;
+                matched_item_code = found_item.item_code || '';
+                matched_item_name = found_item.item_name;
+            }
+            
+           
+        }
+
+        row.extracted_text = description;
         row.description = description;
         row.item_link = matched_item_id;
        
@@ -250,241 +338,6 @@ function populate_form_with_data(frm, data) {
     console.log("✅ Form populated successfully");
 }
 
-// دالة فتح نموذج فاتورة شراء جديد كامل
-function open_purchase_invoice_form1(frm) {
-    // التحقق من البيانات الأساسية
-    if (!frm.doc.supplier_link) {
-        frappe.msgprint(__('Please select a supplier first'));
-        return;
-    }
-    
-    if (!frm.doc.items || frm.doc.items.length === 0) {
-        frappe.msgprint(__('No items found in the extracted invoice'));
-        return;
-    }
-    
-    // جمع بيانات الأصناف
-    const items_data = [];
-    frm.doc.items.forEach(function(item) {
-        items_data.push({
-            
-            item_name: item.item_name,
-           
-            qty: item.quantity,
-            rate: item.rate,
-            amount: item.amount
-           
-        });
-    });
-    
-    // حساب نسبة الضريبة
-    let tax_rate = 15;
-    if (frm.doc.subtotal && frm.doc.subtotal > 0 && frm.doc.tax_amount && frm.doc.tax_amount > 0) {
-        tax_rate = (frm.doc.tax_amount / frm.doc.subtotal) * 100;
-        tax_rate = Math.round(tax_rate * 100) / 100;
-    }
-    
-    // الحصول على حساب الضريبة الافتراضي
-    frappe.call({
-        method: 'frappe.client.get_list',
-        args: {
-            doctype: 'Account',
-            filters: [
-                ['account_type', '=', 'Tax'],
-                ['company', '=', frappe.defaults.get_user_default("company")],
-                ['is_group', '=', 0]
-            ],
-            fields: ['name'],
-            limit: 1
-        },
-        callback: function(r) {
-            let tax_account = '';
-            if (r.message && r.message.length > 0) {
-                tax_account = r.message[0].name;
-            }
-            
-            // فتح نموذج فاتورة شراء جديد
-            frappe.new_doc('Purchase Invoice', {
-                // البيانات الأساسية
-                supplier: frm.doc.supplier_link,
-                supplier_name: frm.doc.supplier_name,
-                bill_no: frm.doc.invoice_number,
-                posting_date: frm.doc.invoice_date || frappe.datetime.get_today(),
-                due_date: frm.doc.due_date || frappe.datetime.add_days(frappe.datetime.get_today(), 30),
-                currency: frm.doc.currency || 'SAR',
-                company: frappe.defaults.get_user_default("company") || '',
-                
-                // الأصناف
-                items: items_data,
-                
-                // الضريبة
-                taxes: frm.doc.tax_amount && frm.doc.tax_amount > 0 ? [{
-                    charge_type: 'On Net Total',
-                    account_head: tax_account || '',
-                    description: `Tax ${tax_rate}%`,
-                    rate: tax_rate
-                }] : [],
-                
-                // إعدادات إضافية
-                set_posting_time: 1,
-                is_return: 0,
-                apply_tds: 0,
-                disable_rounded_total: 0,
-                update_stock: 0 // افتراضي 0، المستخدم يحدد
-            }).then(function(doc) {
-                console.log("✅ Purchase Invoice form opened with extracted data");
-                
-                // إضافة حدث لحفظ الفاتورة لربطها
-                doc.frm.cscript.save = function() {
-                    const original_save = this._super;
-                    return function() {
-                        original_save.apply(this, arguments).then(function() {
-                            // بعد الحفظ الناجح، ربط الفاتورة المستخرجة
-                            if (doc.frm.doc.name) {
-                                link_extracted_to_purchase_invoice(frm, doc.frm.doc.name);
-                            }
-                        });
-                    };
-                }(doc.frm.cscript.save);
-            });
-        }
-    });
-}
-function open_purchase_invoice_form2(frm) {
-    if (!frm.doc.supplier_link) {
-        frappe.msgprint(__('Please select a supplier first'));
-        return;
-    }
-
-    if (!frm.doc.items || frm.doc.items.length === 0) {
-        frappe.msgprint(__('No items found in the extracted invoice'));
-        return;
-    }
-
-    // جهّز بيانات الأصناف من Extracted Invoice
-    const items_data = (frm.doc.items || []).map(it => ({
-        // لازم يكون Item Code الحقيقي (أو اسم الصنف إذا نظامك يستخدمه ككود)
-        item_code: it.item_code || it.item_link || '',
-        qty: parseFloat(it.quantity || 0),
-        rate: parseFloat(it.rate || 0)
-    }));
-
-    console.log("items_data to push:", items_data);
-
-    // مرّر بيانات للفاتورة عبر route_options
-    frappe.route_options = {
-        supplier: frm.doc.supplier_link,
-        bill_no: frm.doc.invoice_number,
-        posting_date: frm.doc.invoice_date || frappe.datetime.get_today(),
-        due_date: frm.doc.due_date || frappe.datetime.add_days(frappe.datetime.get_today(), 30),
-        currency: frm.doc.currency || 'SAR',
-        company: frappe.defaults.get_user_default("company") || '',
-        __extracted_items_data: items_data,   // مفتاح خاص بنا
-        __extracted_invoice_name: frm.doc.name
-    };
-
-    // افتح نموذج جديد
-    frappe.new_doc('Purchase Invoice');
-
-    // بعد ما يفتح النموذج فعليًا، أضف الصفوف
-    const interval = setInterval(() => {
-        if (cur_frm && cur_frm.doctype === 'Purchase Invoice' && cur_frm.is_new()) {
-            clearInterval(interval);
-
-            const data = frappe.route_options?.__extracted_items_data || [];
-            if (!data.length) {
-                console.log("No extracted items found in route_options");
-                return;
-            }
-
-            // امسح أي صفوف افتراضية
-            cur_frm.clear_table('items');
-
-            data.forEach(d => {
-                const row = cur_frm.add_child('items');
-                row.item_name = d.item_name;
-                row.qty = d.qty;
-                row.rate = d.rate;
-            });
-
-            cur_frm.refresh_field('items');
-            console.log("✅ Rows added to Purchase Invoice items table");
-        }
-    }, 200);
-}
-
-
-function open_purchase_invoice_form11111(frm) {
-    if (!frm.doc.supplier_link) {
-        frappe.msgprint(__('Please select a supplier first'));
-        return;
-    }
-    if (!frm.doc.items || frm.doc.items.length === 0) {
-        frappe.msgprint(__('No items found in the extracted invoice'));
-        return;
-    }
-
-    const items_data = (frm.doc.items || []).map(it => ({
-        // لاحظ: هذه "أسماء" وليست item_code حقيقي — سنعالجها تحت
-        item_name: it.item_code || it.item_link || it.item_name || '',
-        qty: parseFloat(it.quantity || 0),
-        rate: parseFloat(it.rate || 0),
-        amount: parseFloat(it.amount || 0)
-    }));
-
-    console.log("items_data to push:", items_data);
-
-    // ✅ خزّن البيانات عالميًا بدل route_options
-    window.__extracted_items_data = items_data;
-    window.__extracted_header = {
-        supplier: frm.doc.supplier_link,
-        bill_no: frm.doc.invoice_number,
-        bill_date: frm.doc.invoice_date || frappe.datetime.get_today(),
-        due_date: frm.doc.due_date || frappe.datetime.add_days(frappe.datetime.get_today(), 30),
-        currency: frm.doc.currency || 'SAR',
-        company: frappe.defaults.get_user_default("company") || ''
-    };
-
-    frappe.new_doc('Purchase Invoice').then(() => {
-        // انتظر لحد ما cur_frm يصير جاهز
-        const wait = setInterval(() => {
-            if (cur_frm && cur_frm.doctype === 'Purchase Invoice') {
-                clearInterval(wait);
-
-                const hdr = window.__extracted_header || {};
-                const data = window.__extracted_items_data || [];
-
-                console.log("Using cached extracted items:", data);
-
-                // عبّي الرأس
-                cur_frm.set_value('supplier', hdr.supplier);
-                cur_frm.set_value('bill_no', hdr.bill_no);
-                cur_frm.set_value('bill_date', hdr.bill_date);
-                cur_frm.set_value('due_date', hdr.due_date);
-                cur_frm.set_value('currency', hdr.currency);
-                cur_frm.set_value('company', hdr.company);
-
-                // امسح وأضف الأصناف
-                cur_frm.clear_table('items');
-
-                data.forEach(d => {
-                    const row = cur_frm.add_child('items');
-                    row.item_code = d.item_name;
-                    row.qty = d.qty;
-                    row.rate = d.rate;
-                    row.amount = d.amount;
-                });
-
-                cur_frm.refresh_field('items');
-                console.log("✅ Rows added to Purchase Invoice items table");
-
-                // نظّف الكاش
-                delete window.__extracted_items_data;
-                delete window.__extracted_header;
-            }
-        }, 100);
-    });
-}
 
 
 
@@ -499,8 +352,8 @@ function open_purchase_invoice_form(frm) {
     }
     let unlinkedItems = [];
     frm.doc.items.forEach(function(item, index) {
-        if (!item.item_link) {
-            unlinkedItems.push(__('Row') + ' ' + (index + 1) + ': ' + item.item_name);
+        if (!item.item_link || item.item_link==" ") {
+            unlinkedItems.push(__('Row') + ' ' + (index + 1) + ': ' + item.extracted_text);
         }
     });
     
@@ -515,7 +368,7 @@ function open_purchase_invoice_form(frm) {
     }
 
     const items_data = (frm.doc.items || []).map(it => ({
-        item_name: it.item_code || it.item_link || it.item_name || '',
+        extracted_text: it.item_code || it.item_link || it.extracted_text || '',
         qty: parseFloat(it.quantity || 0),
         rate: parseFloat(it.rate || 0),
         amount: parseFloat(it.amount || 0)
@@ -567,7 +420,7 @@ function open_purchase_invoice_form(frm) {
 
                 data.forEach(d => {
                     const row = cur_frm.add_child('items');
-                    row.item_code = d.item_name;
+                    row.item_code = d.extracted_text;
                     row.qty = d.qty;
                     row.rate = d.rate;
                     row.amount = d.amount;
@@ -1071,7 +924,7 @@ function link_extracted_to_purchase_invoice(frm, purchase_invoice_name) {
 // ============ كود إضافي للتحسين ============
 
 // عند النقر على حقل الصنف في الجدول، فتح بحث
-$(document).on('click', '[data-fieldname="item_name"] input', function() {
+$(document).on('click', '[data-fieldname="extracted_text"] input', function() {
     const $row = $(this).closest('[data-idx]');
     const idx = $row.attr('data-idx');
     const frm = cur_frm;
@@ -1080,12 +933,12 @@ $(document).on('click', '[data-fieldname="item_name"] input', function() {
         const grid = frm.fields_dict.items.grid;
         const row = grid.grid_rows_by_docname[idx];
         
-        if (row && row.doc.item_name) {
+        if (row && row.doc.extracted_text) {
             frappe.prompt({
                 fieldtype: 'Data',
                 label: __('Search Item'),
                 fieldname: 'item_search',
-                default: row.doc.item_name,
+                default: row.doc.extracted_text,
                 reqd: 1
             }, function(values) {
                 search_and_select_item(values.item_search, idx);
@@ -1129,7 +982,7 @@ function search_and_select_item(item_name, row_idx) {
                         
                         if (row) {
                             row.doc.item_link = item_id;
-                            row.doc.item_name = item_name;
+                            row.doc.extracted_text = item_name;
                             row.doc.item_code = item_code;
                             grid.refresh();
                             
@@ -1171,3 +1024,4 @@ function get_items_html(items) {
     
     return html;
 }
+
