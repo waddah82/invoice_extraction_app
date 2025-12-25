@@ -30,7 +30,7 @@ class ExtractedInvoice(Document):
             missing_fields.append("Items")
         else:
             for item in self.items:
-                if not item.item_name:
+                if not item.extracted_text:
                     missing_fields.append(f"Item name in row {item.idx}")
                 if item.quantity <= 0:
                     missing_fields.append(f"Quantity in row {item.idx}")
