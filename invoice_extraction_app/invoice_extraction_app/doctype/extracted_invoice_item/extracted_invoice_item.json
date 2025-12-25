@@ -6,7 +6,7 @@
     "istable": 1,
     "fields": [
         {
-            "fieldname": "item_name",
+            "fieldname": "extracted_text",
             "fieldtype": "Data",
             "label": "Extracted Item Name",
             "reqd": 1
