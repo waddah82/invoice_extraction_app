@@ -1,0 +1,83 @@
+{
+  "doctype": "DocType",
+  "name": "Telegram Settings",
+  "module": "Invoice Extraction App",
+  "custom": 1,
+  "issingle": 1,
+  "autoname": "Telegram Settings",
+  "fields": [
+    {
+      "fieldname": "t_enabled",
+      "fieldtype": "Check",
+      "label": "Enable Telegram Integration",
+      "default": 0
+    },
+    {
+      "fieldname": "bot_token",
+      "fieldtype": "Data",
+      "label": "Telegram Bot Token",
+      "reqd": 0,
+      "password": 1
+    },
+    {
+      "fieldname": "admin_chat_id",
+      "fieldtype": "Data",
+      "label": "Admin Chat ID",
+      "description": "If set, only messages from this chat will be processed"
+    },
+    {
+      "fieldname": "ngrok_url",
+      "fieldtype": "Data",
+      "label": "ngrok URL",
+      "read_only": 1
+    },
+    {
+      "fieldname": "public_base_url",
+      "fieldtype": "Data",
+      "label": "ngrok URL",
+      "read_only": 1
+    },
+    {
+      "fieldname": "webhook_url",
+      "fieldtype": "Data",
+      "label": "Webhook URL",
+      "read_only": 1
+    },
+    {
+      "fieldname": "webhook_active",
+      "fieldtype": "Check",
+      "label": "Webhook Active",
+      "default": 0,
+      "read_only": 1
+    },
+    {
+      "fieldname": "polling_enabled",
+      "fieldtype": "Check",
+      "label": "Enable Polling",
+      "default": 0,
+      "description": "Use polling instead of webhook for local development"
+    },
+    {
+      "fieldname": "telegram_last_update_id",
+      "fieldtype": "Int",
+      "label": "Last Update ID",
+      "default": 0,
+      "read_only": 1
+    }
+  ],
+
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "share": 1,
+      "print": 1,
+      "email": 1
+    }
+  ]
+}
