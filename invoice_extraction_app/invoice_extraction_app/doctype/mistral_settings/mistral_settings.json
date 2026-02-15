@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "autoname": "prompt:Mistral Settings",
+ "creation": "2026-01-18 20:38:48.720471",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "mistral_api_key",
+  "ocr_model",
+  "selected_model",
+  "temperature",
+  "section_break_2",
+  "system_instruction",
+  "json_format",
+  "prompt_instructions",
+  "section_break_3",
+  "enable_debug_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "API Configuration"
+  },
+  {
+   "description": "Get your API key from https://console.mistral.ai/api-keys/",
+   "fieldname": "mistral_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mistral API Key",
+   "reqd": 1
+  },
+  {
+   "default": "mistral-large-latest",
+   "description": "Choose the Mistral model to use for extraction",
+   "fieldname": "selected_model",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Chat Model",
+   "options": "pixtral-12b-2409\nmistral-medium-2505\nmistral-medium-2508\nmistral-medium-latest\nmistral-medium\nmistral-vibe-cli-with-tools\nopen-mistral-nemo\nopen-mistral-nemo-2407\nmistral-tiny-2407\nmistral-tiny-latest\nmistral-large-2411\npixtral-large-2411\npixtral-large-latest\nmistral-large-pixtral-2411\ncodestral-2508\ncodestral-latest\ndevstral-small-2507\ndevstral-medium-2507\ndevstral-2512\nmistral-vibe-cli-latest\ndevstral-medium-latest\ndevstral-latest\nlabs-devstral-small-2512\ndevstral-small-latest\nmistral-small-2506\nmistral-small-latest\nlabs-mistral-small-creative\nmagistral-medium-2509\nmagistral-medium-latest\nmagistral-small-2509\nmagistral-small-latest\nvoxtral-mini-2507\nvoxtral-mini-latest\nvoxtral-small-2507\nvoxtral-small-latest\nmistral-large-2512\nmistral-large-latest\nministral-3b-2512\nministral-3b-latest\nministral-8b-2512\nministral-8b-latest\nministral-14b-2512\nministral-14b-latest\nmistral-small-2501\nmistral-embed-2312\nmistral-embed\ncodestral-embed\ncodestral-embed-2505\nmistral-moderation-2411\nmistral-moderation-latest\nmistral-ocr-2512\nmistral-ocr-latest\nmistral-ocr-2505\nmistral-ocr-2503\nvoxtral-mini-2602\nvoxtral-mini-latest\nvoxtral-mini-transcribe-2507\nvoxtral-mini-2507",
+   "reqd": 1
+  },
+  {
+   "default": "0.1",
+   "description": "Controls randomness: Lower = more deterministic, Higher = more creative",
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature",
+   "precision": "2"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.name",
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Prompt Configuration"
+  },
+  {
+   "default": "\u0623\u0646\u062a \u0645\u062a\u062e\u0635\u0635 \u0641\u064a \u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0645\u0646 \u0641\u0648\u0627\u062a\u064a\u0631 \u0627\u0644\u0634\u0631\u0627\u0621. \u0627\u0633\u062a\u062e\u0631\u062c \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0628\u062f\u0642\u0629 \u0645\u0639 \u0627\u0644\u062a\u0631\u0643\u064a\u0632 \u0639\u0644\u0649 \u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0636\u0631\u0627\u0626\u0628 \u0648\u0627\u0644\u062d\u0633\u0627\u0628\u0627\u062a \u0627\u0644\u0645\u0627\u0644\u064a\u0629.",
+   "description": "System instruction sent to the model to define its role",
+   "fieldname": "system_instruction",
+   "fieldtype": "Text Editor",
+   "label": "System Instruction"
+  },
+  {
+   "default": "{\n    \"supplier\": \"\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0631\u062f\",\n    \"supplier_ar\": \"\u0627\u0633\u0645 \u0627\u0644\u0645\u0648\u0631\u062f \u0628\u0627\u0644\u0639\u0631\u0628\u064a\u0629\",\n    \"invoice_number\": \"\u0631\u0642\u0645 \u0627\u0644\u0641\u0627\u062a\u0648\u0631\u0629\",\n    \"date\": \"\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0641\u0627\u062a\u0648\u0631\u0629 (YYYY-MM-DD)\",\n    \"due_date\": \"\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0627\u0633\u062a\u062d\u0642\u0627\u0642 (YYYY-MM-DD)\",\n    \"subtotal\": \"\u0627\u0644\u0645\u0628\u0644\u063a \u0642\u0628\u0644 \u0627\u0644\u0636\u0631\u064a\u0628\u0629\",\n    \"tax_amount\": \"\u0645\u0628\u0644\u063a \u0627\u0644\u0636\u0631\u064a\u0628\u0629 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a\",\n    \"total_amount\": \"\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0628\u0639\u062f \u0627\u0644\u0636\u0631\u064a\u0628\u0629\",\n    \"currency\": \"\u0627\u0644\u0639\u0645\u0644\u0629\",\n    \"items\": [\n        {\n            \"description\": \"\u0648\u0635\u0641 \u0627\u0644\u0635\u0646\u0641\",\n            \"description_ar\": \"\u0648\u0635\u0641 \u0627\u0644\u0635\u0646\u0641 \u0628\u0627\u0644\u0639\u0631\u0628\u064a\u0629\",\n            \"quantity\": \"\u0627\u0644\u0643\u0645\u064a\u0629\",\n            \"unit_price\": \"\u0633\u0639\u0631 \u0627\u0644\u0648\u062d\u062f\u0629\",\n            \"item_total\": \"\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0644\u0644\u0635\u0646\u0641 (\u0627\u0644\u0643\u0645\u064a\u0629 \u00d7 \u0627\u0644\u0633\u0639\u0631)\",\n            \"tax_amount\": \"\u0645\u0628\u0644\u063a \u0627\u0644\u0636\u0631\u064a\u0628\u0629 \u0644\u0644\u0635\u0646\u0641\",\n            \"total_with_tax\": \"\u0627\u0644\u0645\u0628\u0644\u063a \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0644\u0644\u0635\u0646\u0641 \u0628\u0639\u062f \u0627\u0644\u0636\u0631\u064a\u0628\u0629\"\n        }\n    ]\n}",
+   "description": "JSON structure template for the model to follow",
+   "fieldname": "json_format",
+   "fieldtype": "Code",
+   "label": "JSON Format Template",
+   "options": "JSON"
+  },
+  {
+   "default": "**\u0627\u0644\u0642\u0648\u0627\u0639\u062f \u0627\u0644\u0645\u0647\u0645\u0629 \u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628:**\\n\\n1. **\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0636\u0631\u064a\u0628\u0629:**\\n   - \u0627\u0633\u062a\u062e\u0631\u062c `tax_amount` (\u0645\u0628\u0644\u063a \u0627\u0644\u0636\u0631\u064a\u0628\u0629) \u0641\u0642\u0637 - \u0644\u0627 \u062d\u0627\u062c\u0629 \u0644\u0646\u0633\u0628\u0629 \u0627\u0644\u0636\u0631\u064a\u0628\u0629\\n   - \u0625\u0630\u0627 \u0643\u0627\u0646\u062a \u0627\u0644\u0641\u0627\u062a\u0648\u0631\u0629 \u062a\u062d\u062a\u0648\u064a \u0639\u0644\u0649 \u0636\u0631\u064a\u0628\u0629: \u0627\u0633\u062a\u062e\u0631\u062c `tax_amount` \u0643\u0642\u064a\u0645\u0629 \u0631\u0642\u0645\u064a\u0629\\n   - \u0625\u0630\u0627 \u0644\u0645 \u062a\u0643\u0646 \u0647\u0646\u0627\u0643 \u0636\u0631\u064a\u0628\u0629: \u0636\u0639 `tax_amount = 0`\\n\\n2. **\u0627\u0633\u062a\u062e\u0631\u0627\u062c \u0627\u0644\u0623\u0635\u0646\u0627\u0641:**\\n   - \u0644\u0643\u0644 \u0635\u0646\u0641\u060c \u0627\u0633\u062a\u062e\u0631\u062c:\\n     - `tax_amount` \u0644\u0644\u0635\u0646\u0641 (\u0645\u0628\u0644\u063a \u0627\u0644\u0636\u0631\u064a\u0628\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0635\u0646\u0641 \u0641\u0642\u0637)\\n     - `item_total` (\u0627\u0644\u0643\u0645\u064a\u0629 \u00d7 \u0633\u0639\u0631 \u0627\u0644\u0648\u062d\u062f\u0629)\\n     - `total_with_tax` (item_total + tax_amount \u0644\u0644\u0635\u0646\u0641)\\n   - \u0625\u0630\u0627 \u0644\u0645 \u064a\u0643\u0646 \u0627\u0644\u0635\u0646\u0641 \u062e\u0627\u0636\u0639 \u0644\u0644\u0636\u0631\u064a\u0628\u0629: `tax_amount = 0` \u0644\u0644\u0635\u0646\u0641\\n   - `total_with_tax` \u064a\u062c\u0628 \u0623\u0646 \u064a\u0633\u0627\u0648\u064a `item_total + tax_amount` \u0644\u0643\u0644 \u0635\u0646\u0641\\n\\n3. **\u062d\u0633\u0627\u0628 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a\u0627\u062a:**\\n   - `subtotal` = \u0645\u062c\u0645\u0648\u0639 `item_total` \u0644\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0635\u0646\u0627\u0641\\n   - `tax_amount` (\u0644\u0644\u0625\u062c\u0645\u0627\u0644\u064a) = \u0645\u062c\u0645\u0648\u0639 `tax_amount` \u0644\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0635\u0646\u0627\u0641\\n   - `total_amount` = `subtotal + tax_amount` (\u0644\u0644\u0625\u062c\u0645\u0627\u0644\u064a)\\n   - \u0625\u0630\u0627 \u0643\u0627\u0646 `total_amount` \u0646\u0627\u0642\u0635\u0627\u064b: \u0627\u062d\u0633\u0628\u0647 = `subtotal + tax_amount`\\n\\n4. **\u0627\u0644\u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u062d\u0633\u0627\u0628\u0627\u062a:**\\n   - \u062a\u0623\u0643\u062f \u0623\u0646: \u0645\u062c\u0645\u0648\u0639 `item_total` \u0644\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0635\u0646\u0627\u0641 \u2248 `subtotal`\\n   - \u062a\u0623\u0643\u062f \u0623\u0646: \u0645\u062c\u0645\u0648\u0639 `tax_amount` \u0644\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0635\u0646\u0627\u0641 \u2248 `tax_amount` \u0644\u0644\u0625\u062c\u0645\u0627\u0644\u064a\\n   - \u062a\u0623\u0643\u062f \u0623\u0646: `total_amount` = `subtotal + tax_amount`\\n\\n5. **\u0627\u0644\u062a\u0646\u0633\u064a\u0642:**\\n   - \u0627\u0644\u062a\u0648\u0627\u0631\u064a\u062e: YYYY-MM-DD\\n   - \u0627\u0644\u0639\u0645\u0644\u0629: SAR \u0623\u0648 USD \u0623\u0648 EUR (\u0627\u0644\u0631\u0645\u0648\u0632 \u0641\u0642\u0637)\\n   - \u0627\u0644\u0623\u0631\u0642\u0627\u0645: \u0642\u064a\u0645 \u0631\u0642\u0645\u064a\u0629 \u0641\u0642\u0637 (\u0628\u062f\u0648\u0646 \u0631\u0645\u0648\u0632 \u0627\u0644\u0639\u0645\u0644\u0629)\\n\\n\u0623\u0631\u062c\u0639 \u0627\u0644\u0646\u0627\u062a\u062c \u0628\u062a\u0646\u0633\u064a\u0642 JSON \u0641\u0642\u0637 \u0628\u062f\u0648\u0646 \u0623\u064a \u0646\u0635 \u0625\u0636\u0627\u0641\u064a.",
+   "description": "Detailed instructions for the model to follow",
+   "fieldname": "prompt_instructions",
+   "fieldtype": "Text Editor",
+   "label": "Prompt Instructions"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Advanced Settings"
+  },
+  {
+   "default": "0",
+   "description": "Enable detailed logging for debugging purposes",
+   "fieldname": "enable_debug_log",
+   "fieldtype": "Check",
+   "label": "Enable Debug Log"
+  },
+  {
+   "default": "mistral-ocr-latest",
+   "fieldname": "ocr_model",
+   "fieldtype": "Select",
+   "label": "OCR Model",
+   "options": "mistral-ocr-latest\nmistral-ocr-2512\nmistral-ocr-2505\nmistral-ocr-2503"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-16 00:18:00.072282",
+ "modified_by": "Administrator",
+ "module": "Invoice Extraction App",
+ "name": "Mistral Settings",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
